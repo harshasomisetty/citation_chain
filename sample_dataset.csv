@@ -1,0 +1,31 @@
+PaperID,Name,Year,Conference,Citations,References,Authors,Pages,Words,IsBestPaper,PaperScore
+1,Recovering from Selection Bias in Causal and Statistical Inference,2014,AAAI ,23,37,5,10,765,Yes,0.84
+2,CondenseNet V2: Sparse Feature Reactivation for Deep Networks,2021,CVPR,12,23,3,12,500,No,0.5
+3,"Achieving single channel, full duplex wireless communication",2010,MOBICOM,3,25,6,7,300,No,0.48
+4,Reconsidering wireless systems with multiple radios,2004,SIGCOM,256,27,4,9,564,No,0.7
+5,Push the Limit of Acoustic Gesture Recognition,2020,INFOCOM,145,45,5,16,926,Yes,0.72
+6,Learning SVM Classifiers with Indefinite Kernels,1995,AAAI ,21,65,5,10,456,No,0.45
+7,Vocabulary Learning via Optimal Transport for Neural Machine Translation,2000,ACL,12,43,2,13,672,No,0.56
+8,Managing Messes in Computational Notebooks,2013,CHI,3,12,3,20,1002,No,0.32
+9,Bricolage: Example-Based Retargeting for Web Design,1997,CIKM,65,89,6,13,345,No,0.78
+10,Trackball text entry for people with motor impairments,2016,CVPR,43,19,2,14,456,No,0.9
+11,Assessing the Impact of Syntactic and Semantic Structures for Answer Passages Reranking,2014,FOCS,12,45,3,11,400,No,0.93
+12,On the Feasibility of Multi-Site Web Search Engines,2020,FSE,89,2,4,9,300,No,0.34
+13,FACeTOR: cost-driven exploration of faceted query results,2011,ICCV,19,14,5,11,500,No,0.54
+14,FANG: Leveraging Social Context for Fake News Detection Using Graph Representation,1998,ICML,45,90,2,12,543,No,0.92
+15,Dynamic 3D Scene Analysis from a Moving Vehicle,1999,ICSE,2,10,5,23,1342,No,0.36
+16,"Navigating Central Path with Electrical Flows: from Flows to Matchings, and Back",2000,CVPR,14,43,6,12,433,No,0.84
+17,Semantic Bug Seeding: A Learning-Based Approach for Creating Realistic Bugs,2002,INFOCOM,90,9,3,17,543,No,0.12
+18,Cooperative Kernels: GPU Multitasking for Blocking Algorithms,1997,SIGCOM,103,14,2,8,234,Yes,0.95
+19,Learning Natural Coding Conventions,2012,SIGMOD,43,32,5,10,643,No,0.34
+20,Isolating Cause-Effect Chains from Computer Programs,2014,NSDI,9,12,3,14,563,No,0.69
+21,SinGAN: Learning a Generative Model from a Single Natural Image,2003,FOCS,14,3,4,10,456,No,0.84
+22,Euclidean Reconstruction and Reprojection up to Subgroups,2002,CHI,32,22,7,12,654,No,0.55
+23,Understanding Black-box Predictions via Influence Functions,2003,KDD,90,10,2,25,1352,No,0.29
+24,Synthesizing Object State Transformers for Dynamic Software Updates,2006,OSDI,45,21,5,11,397,No,0.62
+25,Detecting incorrect build rules,1999,SIGCOM,3,12,3,12,529,Yes,0.41
+26,Large-Scale Analysis of Framework-Specific Exceptions in Android Apps,2020,SIGMETRICS,5,3,5,17,739,No,0.56
+27,VDTest: An Automated Framework to Support Testing for Virtual Devices,2021,AAAI ,12,4,4,16,632,No,0.54
+28,Data Clone Detection and Visualization in Spreadsheets,2018,IJCAI,25,23,6,14,524,No,0.88
+29,Automatically finding patches using genetic programming,2020,CIKM,34,43,2,10,372,No,0.99
+30,SNIAFL: Towards a Static Non-Interactive Approach to Feature Location,2015,MOBICOM,94,20,1,27,1783,Yes,0.32
