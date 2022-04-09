@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    <h1>Directory Page: {{path}}</h1>
+    <a href="{{'/dir'}}"><h3>Main Page</h3></a>
+    <h3>Directories</h3>
+    {% for dir in subdirs: %}
+    <a href="{{path ~ '/' ~ dir}}">{{ dir }}</a>
+    <p></p>
+	{% endfor %}
+
+    <h3>Metrics</h3>
+    {% for file in subfiles: %}
+    <a href="{{path ~ '/' ~ file}}" >{{file}}</a>
+    <p></p>
+	{% endfor %}
+  </body>
+</html>
