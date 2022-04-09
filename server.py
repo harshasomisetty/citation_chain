@@ -1,15 +1,33 @@
 import os
+import pandas
+import json
 from flask import Flask, render_template
-
-
 
 # List of metadata files to ignore.
 ignore = [".DS_Store", ]
 
 # Data directory path of stored documents
-dir = "data1/"
+dir = "data/"
 app = Flask(__name__, static_folder=dir)
 
+blockspace_path = "data/blockspace.json"
+with open(blockspace_path, 'r') as f:
+    data = json.load(f)
+
+def find_paper(conf, metric):
+    block_index = str(len(data) - 2)
+    block = data[block_index]
+    final_paper = ""
+    print("finding", conf, metric)
+    if metric in block.keys():
+        for paper in block[metric]:
+            if paper[2].strip() == conf:
+                final_paper = paper[0]
+
+        print("final: ", final_paper)
+        return final_paper
+    else:
+        return "not metric"
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
@@ -27,11 +45,18 @@ def access_path(path_user=""):
         path = dir
     else:
         path = dir+path_user
+
+    params = path_user.split("/")
+
     if os.path.exists(path):
         if os.path.isfile(path):
+            metric = params[-1]
+            conf = params[-2]
             with open(path, "r") as f:
                 content = f.read()
-            return render_template('content.html', title='Content', content = content)
+            paper = find_paper(conf, metric)
+            print("found", paper)
+            return render_template('content.html', title='Content', content = content, conf = conf, metric = metric, paper = paper)
         else:
 
             subdirs = []

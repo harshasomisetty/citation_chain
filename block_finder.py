@@ -47,9 +47,9 @@ def create_block(batch):
     new_block = {}
     prev_block = read_block()
 
-    for metric in metrics[1:2]:
+    for metric in metrics:
         cur_ranking = prev_block[metric]
-        new_papers = batch[["Name", metric]].sort_values(by=[metric], ascending=False)
+        new_papers = batch[["Name", metric, "Conference"]].sort_values(by=[metric], ascending=False)
         for paper in new_papers.values:
             cur_ranking = insert_paper(cur_ranking, list(paper))
         new_block[metric] = cur_ranking
@@ -64,22 +64,12 @@ def create_block(batch):
     with open(blockspace_path, 'w+') as f:
          json.dump(data, f)
 
-
-def dfinterface():
-    return
-    # will inhereit same directory struct of conferences
-    # inhereit same metrics
-    # when person queries, will read latest block and that metric, display the top paper
-
-
-
 def block_routine():
     if os.path.exists(blockspace_path):
         
         os.remove(blockspace_path)
-        with open(blockspace_path, 'w') as f:
-            pass
-        print(os.listdir("."))
+    with open(blockspace_path, 'w') as f:
+        pass
         
     for batch_ind in batch_indexes[:2]:
         batch = df[df["PaperID"].isin(batch_ind)]
@@ -89,6 +79,7 @@ def block_routine():
     with open(blockspace_path, 'r') as f:
         data = json.load(f)
 
+    print("block length", len(data))
     print("-1", data["-1"], "\n\n")
     print("0", data["0"], "\n\n")
     print("1", data["1"], "\n\n")
@@ -101,8 +92,13 @@ def init_directories():
         if not os.path.exists("data/"+conf):
             os.mkdir("data/"+conf)
         for metric in metrics:
-            with open("data/"+conf+"/"+metric, 'w') as f:
-                pass
+            with open("data/"+conf+"/"+metric, 'w+') as f:
+                f.write("this file links to the paper with highest " + metric  + " in conference " + conf)
+
+    for metric in metrics:
+        with open("data/"+metric, 'w+') as f:
+            f.write("this file links to the paper with highest " + metric + " in conference " + "all conf")
+            
     # print(confs)
     
 if __name__ == "__main__":
