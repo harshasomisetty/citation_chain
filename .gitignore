@@ -2,9 +2,6 @@
 .DS_Store
 
 
-data
-data1
-
-
-
+archive
+block_data
 old_server.py

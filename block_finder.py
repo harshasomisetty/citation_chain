@@ -1,9 +1,15 @@
-import pandas
+import pandas as pd
 import json
 import os
+import shutil
+from collections import defaultdict
 
-blockspace_path = "data/blockspace.json"
-df = pandas.read_csv('sample_dataset.csv')
+directory_path = "data1/"
+block_directory_path = "block_data/"
+blockspace_path = "blockspace.json"
+
+df = pd.read_csv('sample_dataset.csv')
+df["Conference"] = df["Conference"].str.strip()
 
 batch_indexes = [
     [1, 6, 11, 16, 21, 26],
@@ -12,8 +18,13 @@ batch_indexes = [
     [4, 9, 14, 19, 24, 29],
     [5, 10, 15, 20, 25, 30]
 ]
-metrics = ["Year", "Citations", "References", "Pages", "Words", "PaperScore"]
+metrics = ["Citations", "References", "Pages", "Words", "PaperScore"]
 
+
+def load_block_data():
+    with open(blockspace_path, 'r+') as f:
+        return json.load(f)
+    
 def read_block():
 
     if os.stat(blockspace_path).st_size == 0:
@@ -22,8 +33,7 @@ def read_block():
         with open(blockspace_path, "w+") as f:
             json.dump(json_data, f)
 
-    with open(blockspace_path, 'r+') as f:
-        data = json.load(f)
+    data = load_block_data()
 
     new_block_index = list(data.keys())[-1]
 
@@ -49,13 +59,13 @@ def create_block(batch):
 
     for metric in metrics:
         cur_ranking = prev_block[metric]
-        new_papers = batch[["Name", metric, "Conference"]].sort_values(by=[metric], ascending=False)
+        new_papers = batch[["Name", "Year", "Conference", metric]].sort_values(by=[metric], ascending=False)
+        # print(new_papers)
         for paper in new_papers.values:
             cur_ranking = insert_paper(cur_ranking, list(paper))
         new_block[metric] = cur_ranking
 
-    with open(blockspace_path, 'r') as f:
-        data = json.load(f)
+    data = load_block_data()
 
     new_block_index = str(int(list(data.keys())[-1])+1)
 
@@ -63,11 +73,65 @@ def create_block(batch):
 
     with open(blockspace_path, 'w+') as f:
          json.dump(data, f)
+    
+def init_directories_block():
+
+    if not os.path.exists(blockspace_path):
+        with open(blockspace_path, "w+") as f:
+            pass
+        
+    if os.path.exists(block_directory_path):
+        shutil.rmtree(block_directory_path)
+    os.mkdir(block_directory_path)
+     
+    data = load_block_data()
+    block_index = str(len(data) - 2)
+    block = data[block_index]
+
+    
+    metrics = list(block.keys())
+
+    if os.path.exists(block_directory_path):
+        shutil.rmtree(block_directory_path)
+        
+    os.mkdir(block_directory_path)
+
+    
+    block_data_dict = defaultdict(lambda: [])
+    for metric in metrics:
+        print(metric)
+        with open(block_directory_path+metric, "w+") as f:
+            print("wrote", block_directory_path+metric)
+            f.write("*" + block[metric][0][0]+"* is the paper with highest " + metric  + " across all confs")
+        # print(block[metric])
+        for paper in block[metric]:
+            cur_name, cur_year, cur_conf = paper[0], str(paper[1]), paper[2]
+            if not os.path.exists(block_directory_path+cur_conf):
+                os.mkdir(block_directory_path+cur_conf)
+                print("created dir", block_directory_path+cur_conf)
+                
+            if not os.path.exists(block_directory_path+cur_conf + "/" + metric):
+                with open(block_directory_path+cur_conf + "/" + metric, "w+") as f:
+                    print("wrote file", block_directory_path+cur_conf + "/" + metric)
+                    f.write("*" + cur_name + "* is the paper with highest " + metric + " in conference " + cur_conf)
+
+            if not os.path.exists(block_directory_path+cur_conf+"/"+cur_year):
+                os.mkdir(block_directory_path+cur_conf+"/"+cur_year)
+                print("created dir", block_directory_path+cur_conf+"/"+cur_year)
+                
+            if not os.path.exists(block_directory_path+cur_conf+"/"+cur_year+"/"+metric):
+                with open(block_directory_path+cur_conf+"/"+cur_year+"/"+metric, "w+") as f:
+                    f.write("*" + cur_name + "* is the paper with highest " + metric + " in conference " + cur_conf + " in year " + cur_year)
+                    print("wrote file", block_directory_path+cur_conf+"/"+cur_year+"/"+metric)
+                    
+            block_data_dict[paper[2].strip()].append(paper[1])
+
+    print("\n\n", block_data_dict)
 
 def block_routine():
     if os.path.exists(blockspace_path):
-        
         os.remove(blockspace_path)
+        
     with open(blockspace_path, 'w') as f:
         pass
         
@@ -76,31 +140,14 @@ def block_routine():
         create_block(batch)
 
 
-    with open(blockspace_path, 'r') as f:
-        data = json.load(f)
+    data = load_block_data()
 
     print("block length", len(data))
-    print("-1", data["-1"], "\n\n")
-    print("0", data["0"], "\n\n")
+    # print("-1", data["-1"], "\n\n")
+    # print("0", data["0"], "\n\n")
     print("1", data["1"], "\n\n")
 
-
-def init_directories():
-    confs = list(set([v.strip() for v in df["Conference"].values]))
-
-    for conf in confs:
-        if not os.path.exists("data/"+conf):
-            os.mkdir("data/"+conf)
-        for metric in metrics:
-            with open("data/"+conf+"/"+metric, 'w+') as f:
-                f.write("this file links to the paper with highest " + metric  + " in conference " + conf)
-
-    for metric in metrics:
-        with open("data/"+metric, 'w+') as f:
-            f.write("this file links to the paper with highest " + metric + " in conference " + "all conf")
-            
-    # print(confs)
     
 if __name__ == "__main__":
-    # init_directories()
     block_routine()
+    init_directories_block()

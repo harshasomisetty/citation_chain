@@ -7,14 +7,14 @@ from flask import Flask, render_template
 ignore = [".DS_Store", ]
 
 # Data directory path of stored documents
-dir = "data/"
+dir = "block_data/"
 app = Flask(__name__, static_folder=dir)
 
-blockspace_path = "data/blockspace.json"
+blockspace_path = "blockspace.json"
 with open(blockspace_path, 'r') as f:
     data = json.load(f)
 
-def find_paper(conf, metric):
+def find_paper_block(conf, metric):
     block_index = str(len(data) - 2)
     block = data[block_index]
     final_paper = ""
@@ -28,6 +28,11 @@ def find_paper(conf, metric):
         return final_paper
     else:
         return "not metric"
+
+def find_paper(path):
+    with open(dir+path, "r") as f:
+        return f.read()
+
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
@@ -50,13 +55,14 @@ def access_path(path_user=""):
 
     if os.path.exists(path):
         if os.path.isfile(path):
-            metric = params[-1]
-            conf = params[-2]
-            with open(path, "r") as f:
-                content = f.read()
-            paper = find_paper(conf, metric)
-            print("found", paper)
-            return render_template('content.html', title='Content', content = content, conf = conf, metric = metric, paper = paper)
+            # metric = params[-1]
+            # conf = params[-2]
+            # with open(path, "r") as f:
+                # content = f.read()
+            content = find_paper(path_user)
+            # print("found", paper)
+            return render_template('content.html', title='Content', content = content)
+        # , conf = conf, metric = metric, paper = paper
         else:
 
             subdirs = []
@@ -74,7 +80,6 @@ def access_path(path_user=""):
         
     else:
         return "Not a existing file"
-
 
 if __name__ == '__main__':
   app.run(debug =True)
