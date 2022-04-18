@@ -3,6 +3,8 @@ import json
 import os
 
 blockspace_path = "data/blockspace.json"
+#read csv file
+
 df = pandas.read_csv('sample_dataset.csv')
 
 batch_indexes = [
