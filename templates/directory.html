@@ -5,6 +5,7 @@
   <body>
     <h1>Directory Page: {{path}}</h1>
     <a href="{{'/dir'}}"><h3>Main Page</h3></a>
+    <p>Block Number: {{block_index}}</p>
     <h3>Directories</h3>
     {% for dir in subdirs: %}
     <a href="{{path ~ '/' ~ dir}}">{{ dir }}</a>

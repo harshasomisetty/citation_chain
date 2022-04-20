@@ -13,7 +13,8 @@ app = Flask(__name__, static_folder=dir)
 blockspace_path = "blockspace.json"
 with open(blockspace_path, 'r') as f:
     data = json.load(f)
-
+    new_block_index = list(data.keys())[-1]
+    
 def find_paper_block(conf, metric):
     block_index = str(len(data) - 2)
     block = data[block_index]
@@ -61,7 +62,7 @@ def access_path(path_user=""):
                 # content = f.read()
             content = find_paper(path_user)
             # print("found", paper)
-            return render_template('content.html', title='Content', content = content)
+            return render_template('content.html', title='Content', content = content, block_index = new_block_index)
         # , conf = conf, metric = metric, paper = paper
         else:
 
@@ -75,7 +76,7 @@ def access_path(path_user=""):
                     else:
                         subfiles.append(file)
 
-            return render_template('directory.html', title='Content', subdirs = sorted(subdirs), subfiles = sorted(subfiles), path = "/dir/"+path_user)
+            return render_template('directory.html', title='Content', subdirs = sorted(subdirs), subfiles = sorted(subfiles), path = "/dir/"+path_user, block_index = new_block_index)
             
         
     else:

@@ -1,11 +1,8 @@
 import pandas as pd
 import json
 import os
-import shutil
 from collections import defaultdict
 
-directory_path = "data1/"
-block_directory_path = "block_data/"
 blockspace_path = "blockspace.json"
 
 df = pd.read_csv('sample_dataset.csv')
@@ -20,134 +17,116 @@ batch_indexes = [
 ]
 metrics = ["Citations", "References", "Pages", "Words", "PaperScore"]
 
+block_data = None
 
-def load_block_data():
-    with open(blockspace_path, 'r+') as f:
-        return json.load(f)
-    
-def read_block():
+# conf: [conf_name, metrics, [years]]
+# year: [year_name, metrics, [papers]]
 
-    if os.stat(blockspace_path).st_size == 0:
-        print('File is empty, initing genesis block')
-        json_data = {-1: {metric: [] for metric in metrics}}
-        with open(blockspace_path, "w+") as f:
-            json.dump(json_data, f)
-
-    data = load_block_data()
-
-    new_block_index = list(data.keys())[-1]
-
-    return data[new_block_index]
+def get_block_confs_names():
+    return [conf[0] for conf in block_data[1]]
 
 
-def insert_paper(prev_papers, new_paper):
-    index = len(prev_papers)
-    for i in range(len(prev_papers)):
-        if prev_papers[i][1] < new_paper[1]:
-            index = i
-            break
-    if index == len(prev_papers):
-        prev_papers = prev_papers[:index]+[new_paper]
-    else:
-        prev_papers = prev_papers[:index]+[new_paper] + prev_papers[index:]
-    return prev_papers
+def get_block_conf(conf_name):
+    for conf in block_data[1]:
+        if conf_name == conf[0]:
+            return conf
+    return []
 
-def create_block(batch):
+def get_conf_years(conf_name):
+    return [year[0] for year in get_block_conf(conf_name)[2]]
 
-    new_block = {}
-    prev_block = read_block()
 
-    for metric in metrics:
-        cur_ranking = prev_block[metric]
-        new_papers = batch[["Name", "Year", "Conference", metric]].sort_values(by=[metric], ascending=False)
-        # print(new_papers)
-        for paper in new_papers.values:
-            cur_ranking = insert_paper(cur_ranking, list(paper))
-        new_block[metric] = cur_ranking
+def check_year_in_conf(conf_name, year_to_check):
+    return year_to_check in get_conf_years(conf_name)
 
-    data = load_block_data()
 
-    new_block_index = str(int(list(data.keys())[-1])+1)
-
-    data[new_block_index] = new_block
-
-    with open(blockspace_path, 'w+') as f:
-         json.dump(data, f)
-    
-def init_directories_block():
-
-    if not os.path.exists(blockspace_path):
-        with open(blockspace_path, "w+") as f:
-            pass
-        
-    if os.path.exists(block_directory_path):
-        shutil.rmtree(block_directory_path)
-    os.mkdir(block_directory_path)
-     
-    data = load_block_data()
-    block_index = str(len(data) - 2)
-    block = data[block_index]
-
-    
-    metrics = list(block.keys())
-
-    if os.path.exists(block_directory_path):
-        shutil.rmtree(block_directory_path)
-        
-    os.mkdir(block_directory_path)
-
-    
-    block_data_dict = defaultdict(lambda: [])
-    for metric in metrics:
-        print(metric)
-        with open(block_directory_path+metric, "w+") as f:
-            print("wrote", block_directory_path+metric)
-            f.write("*" + block[metric][0][0]+"* is the paper with highest " + metric  + " across all confs")
-        # print(block[metric])
-        for paper in block[metric]:
-            cur_name, cur_year, cur_conf = paper[0], str(paper[1]), paper[2]
-            if not os.path.exists(block_directory_path+cur_conf):
-                os.mkdir(block_directory_path+cur_conf)
-                print("created dir", block_directory_path+cur_conf)
-                
-            if not os.path.exists(block_directory_path+cur_conf + "/" + metric):
-                with open(block_directory_path+cur_conf + "/" + metric, "w+") as f:
-                    print("wrote file", block_directory_path+cur_conf + "/" + metric)
-                    f.write("*" + cur_name + "* is the paper with highest " + metric + " in conference " + cur_conf)
-
-            if not os.path.exists(block_directory_path+cur_conf+"/"+cur_year):
-                os.mkdir(block_directory_path+cur_conf+"/"+cur_year)
-                print("created dir", block_directory_path+cur_conf+"/"+cur_year)
-                
-            if not os.path.exists(block_directory_path+cur_conf+"/"+cur_year+"/"+metric):
-                with open(block_directory_path+cur_conf+"/"+cur_year+"/"+metric, "w+") as f:
-                    f.write("*" + cur_name + "* is the paper with highest " + metric + " in conference " + cur_conf + " in year " + cur_year)
-                    print("wrote file", block_directory_path+cur_conf+"/"+cur_year+"/"+metric)
-                    
-            block_data_dict[paper[2].strip()].append(paper[1])
-
-    print("\n\n", block_data_dict)
-
-def block_routine():
+def clear_block_data():
     if os.path.exists(blockspace_path):
         os.remove(blockspace_path)
         
     with open(blockspace_path, 'w') as f:
         pass
-        
-    for batch_ind in batch_indexes[:2]:
-        batch = df[df["PaperID"].isin(batch_ind)]
-        create_block(batch)
-
-
-    data = load_block_data()
-
-    print("block length", len(data))
-    # print("-1", data["-1"], "\n\n")
-    # print("0", data["0"], "\n\n")
-    print("1", data["1"], "\n\n")
 
     
+def read_block():
+    return
+
+
+
+def insert_paper(paper):
+    global block_data
+    def insert_new_year(paper, conf):
+        new_year = [paper[1], metrics, [paper[0]]]
+        conf[2].append(new_year)
+        
+    conf_modify = []
+
+    # print("preinsert", block_data)
+    for ind, conf in enumerate(block_data[1]):
+        if paper[2] == conf[0]:
+            conf_modify=block_data[1].pop(ind)
+
+    if not conf_modify:
+        conf_modify = [paper[2], metrics, []]
+        insert_new_year(paper, conf_modify)
+    else:
+        # rewrite conf metrics
+        # rewrite year metrics
+        if conf_modify[2][0] == paper[1]: # existing year
+            conf_modify[2][2].append(paper[0])
+        else:
+            new_year = [paper[1], metrics, [paper[0]]]
+            insert_new_year(paper, conf_modify)
+            # conf_modify[2].append(new_year)
+        
+    block_data[1].append(conf_modify)
+    return
+
+
+def create_block(batch):
+    print("create block", block_data)
+    print("Cols", batch.columns)
+    new_inserts = defaultdict(lambda: [])
+    result = [[*f] for f in zip(batch["Name"], batch["Year"], batch["Conference"])]
+    for i in result:
+        print(i)
+        insert_paper(i)
+        new_inserts[i[2]].append(i[1])
+
+
+    print(new_inserts)
+    print(check_year_in_conf("AAAI", 2014))
+    print(block_data)
+
+
+def init_data():
+    global block_data
+    block_data = [[], []]
+    block_data_indexes = []
+    for ind, metric in enumerate(metrics):
+        block_data[0].insert(ind, "")
+    print("inited", block_data)
+        
+def block_routine():
+    init_data()
+
+
+    for batch_ind in batch_indexes[:1]:
+        batch = df[df["PaperID"].isin(batch_ind)]
+        create_block(batch)
+        
+
+
+    # data = load_block_data()
+
+    # print("block length", len(data))
+    # print(data["3"])
+
+
 if __name__ == "__main__":
+    # clear_block_data()
     block_routine()
-    init_directories_block()
+
+    # print(block_data)
+    # init_data()
+    # print(block_data)

@@ -1,4 +1,12 @@
+* Intro
+* Architecture
+First "block finder" reads in the data set, and according to a predetermined pattern of inserting documents into the application, creates and inserts "blocks" of papers into the current chain.
 
+Each block itself is a JSON object, that contains metrics as keys, and values as a greatest-to-least ordered list of papers according to that metric.
+
+Each creation step then involved inserting new papers' metrics into the lists, while maintaining orderliness.
+
+Finally, after all the blocks are created, the "init directories by block" method reads in the latest block, and recreates a file structure that mirrors the data in the block. Specifically, the first paper in a metric's list is clearly the greatest metric, so that paper would be linked to by the corresponding metric link in the root directory. Then, sub-directories are created for each unique conference, and according to the stored papers, sub-directories of years are created for the conferences. Each subdirectory has links to the paper represented by the metric 
 
 * Conferences
 IEEE on computer vision and pattern recognition
@@ -9,3 +17,14 @@ https://research.com/conference/neurips-2021-neural-information-processing-syste
 
 International joint conference on artificial intelligence
 https://research.com/conference/ijcai-2021-international-joint-conference-on-artificial-intelligence-ijcai
+
+
+
+
+* Implementation
+overall, we choose a conf, year, etc to add stuff too. the existing papers are taken, all papers are sorted etc, and the metrics are recalced and overwrite the current metric place holder
+ds will just be giant list or some shit
+then when user finds their desired metric, will return link to doi
+
+
+for history, will store which papers were inserted
