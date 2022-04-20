@@ -3,7 +3,12 @@ import json
 import os
 from collections import defaultdict
 
-blockspace_path = "blockspace.json"
+blockspace_path = "data/blockspace.json"
+#read csv file
+
+df = pandas.read_csv('sample_dataset.csv')
+directory_path = "data1/"
+block_directory_path = "block_data/"
 
 df = pd.read_csv('sample_dataset.csv')
 df["Conference"] = df["Conference"].str.strip()
