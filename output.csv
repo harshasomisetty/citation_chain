@@ -1,4 +1,4 @@
-PaperId,Paper,Year,Conference,Citations,References,Authors,Pages,CitationVelocity,#AuthorsofAffiliations,#DocumentsofAffiliation,#DocsbyAuthors,hIndexAuthors,PlumX,Link
+PaperId,Paper,Year,Conference,Citations,References,Authors,Pages,CitationVelocity,NumOfAuthorsofAffiliations,NumOfDocumentsofAffiliation,NumOfDocsbyAuthors,hIndexAuthors,PlumX,Link
 10.1145/3368089.3409670,A principled approach to GraphQL query cost analysis,2020,FSE,3,41,6,11,0,4781,15258,149,43,22,https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85097159404&origin=inward
 10.1007/978-3-030-33702-5_1,An Empirical Study of GraphQL Schemas,2019,ICSOC,15,31,5,16,0,27018,139183,111,31,36,https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85076348560&origin=inward
 10.1109/SER-IP52554.2021.00009,Can GraphQL Replace REST? A Study of Their Efficiency and Viability,2021,SER&IP,2,20,4,7,0,58,184,49,17,12,https://www.scopus.com/inward/record.uri?partnerID=HzOxMe3b&scp=85113150932&origin=inward
