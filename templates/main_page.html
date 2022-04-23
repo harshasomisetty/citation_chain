@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>sdf</title>
+  </head>
+  <body>
+    <h1>Main Page</h1>
+    <h3>Metrics</h3>
+    {% for metric in metrics: %}
+    <a href="{{'metric/' ~ metric}}">
+      <p>
+        {{metric}}
+      </p>
+    </a>
+    {% endfor %}
+
+
+    <h3>Conferences</h3>
+    {% for conf in confs %}
+    <a href="{{conf}}">
+      <p>
+        {{conf}}
+      </p>
+    </a>
+    {% endfor%}
+  </body>
+</html>

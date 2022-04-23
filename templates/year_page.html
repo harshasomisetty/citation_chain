@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>sdf</title>
+  </head>
+  <body>
+    <h1>Year Page: {{year}} in conference {{conf}}</h1>
+    <a href="{{'/nav/'}}">
+      <p>Main page</p>
+    </a>
+    <a href="{{'/nav/' ~ conf}}">
+      <p>Prev Conf page</p>
+    </a>
+    
+    <h3>Metrics</h3>
+    {% for metric in metrics: %}
+    <a href="{{year ~ '/metric/' ~ metric}}">
+      <p>{{metric}}</p>
+    </a>
+
+    {% endfor %}
+
+  </body>
+</html>
