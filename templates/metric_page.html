@@ -4,6 +4,24 @@
   </head>
   <body>
     <h1>Metric Page: {{metric}}</h1>
+    <a href="{{'/nav/'}}">
+      <p>Main page</p>
+    </a>
+
+    {% if conf %}
+    <a href="{{'/nav/' ~ conf}}">
+      <p>Prev Conf page: {{conf}}</p>
+    </a>
+    {% endif %}
+
+    
+    {% if year %}
+    <a href="{{'/nav/' ~ conf ~ '/' ~ year}}">
+      <p>Prev Year page: {{year}}</p>
+    </a>
+    {% endif %}
+
+    
     <p>{{paper}}</p>
   </body>
 </html>

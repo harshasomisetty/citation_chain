@@ -8,8 +8,10 @@ blockspace_path = "blockspace.json"
 
 df = pd.read_csv('output_1.csv')
 df["Conference"] = df["Conference"].str.strip()
+df = df.dropna()
 
-metrics = ["Citations", "References", "Authors", "Pages", "CitationVelocity", "#AuthorsofAffiliations", "#DocumentsofAffiliation", "#DocsbyAuthors", "hIndexAuthors", "PlumX", "PageRank"]
+metrics = list(df.columns[4:])
+metrics.remove("Link")
 
 block_data = None
 
@@ -36,6 +38,13 @@ def get_conf_year_list(conf_name): # Returns list of years in a conference.
     else:
         return []
 
+def get_all_papers():
+    papers = []
+    for conf_name in get_confs_names():
+        papers += get_conf_papers(conf_name)
+
+    return papers
+
 def get_conf_papers(conf_name): # Get all papers in a conference.
     conf = get_conf(conf_name)
     papers = []
@@ -46,6 +55,7 @@ def get_conf_papers(conf_name): # Get all papers in a conference.
 
 def get_conf_year_papers(conf_name, year_check): # Get all papers in a year of a conf.
     conf = get_conf(conf_name)
+    # print("fund", conf_name, conf)
     for year in conf[2]:
         if year[0]==year_check:
             return year[2]
@@ -156,52 +166,54 @@ def create_block(batch):
         if i[1] not in new_inserts[i[2]]:
             new_inserts[i[2]].append(i[1])
 
-    
     return new_inserts
 
         
 def block_routine(batch):
 
     def get_top_paper(papers, metric):
-        found_batch = df[df["PaperId"].isin(papers)]
-        return found_batch.sort_values(by=[metric], ascending=False)[["Paper", metric]].head(1).values.tolist()[0]
+        found_batch = df[df["PaperId"].isin(papers)].sort_values(by=[metric], ascending=False)[["Paper", metric]]
+        return found_batch.head(1).values.tolist()[0]
 
     def set_block_metrics(metric_ptr, papers):
         for ind, metric in enumerate(metrics):
             top_paper = get_top_paper(papers, metric)
             metric_ptr[ind] = top_paper[0]
+    
     new_inserts = create_block(batch)
-
 
     print("new inserts", new_inserts, "\n")
 
-    new_all_papers = []
     for conf in new_inserts.keys():
         conf_block = get_conf(conf)
         new_conf_papers = []
         for year in new_inserts[conf]:
 
-            new_year_papers = get_conf_year_papers(conf, year)
-            new_conf_papers += new_year_papers
-            
             year_block = get_conf_and_year(conf, year)
+            set_block_metrics(year_block[1], get_conf_year_papers(conf, year))
 
-            set_block_metrics(year_block[1], new_year_papers)
-
-        set_block_metrics(conf_block[1], new_conf_papers)
+        set_block_metrics(conf_block[1], get_conf_papers(conf))
                 
-        new_all_papers += new_conf_papers
-
-    set_block_metrics(block_data[0], new_all_papers)
+    set_block_metrics(block_data[0], get_all_papers())
+    
     save_block()
-    print(block_data, "\n")
+    # print(block_data, "\n")
 
-if __name__ == "__main__":
+def process_all_blocks():
     init_data()
-    # clear_block_data()
-    block_length = 3
-    for i in range(5,7):
+    block_length = 10
+    print(int(len(df)/block_length))
+    for i in range(int(len(df)/block_length)+1):
         batch = df[i*block_length: i*block_length+block_length]
-        print(batch[["Paper"]])
+        # print(batch[["Paper", "Conference"]])
         block_routine(batch)
-        
+    
+if __name__ == "__main__":
+
+    process_all_blocks()
+    print("TOP", df.sort_values(by=["Citations"], ascending=False)[["Paper", "Citations"]])
+    print("TOP", df.sort_values(by=["References"], ascending=False)[["Paper", "References"]])
+    print("TOP", df.sort_values(by=["Authors"], ascending=False)[["Paper", "Authors"]])
+    # print("TOP", df.sort_values(by=["Pages"], ascending=False)[["Paper", "Pages"]])
+
+    # print(metrics)
