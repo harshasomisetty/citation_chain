@@ -31,7 +31,43 @@ Each block itself is a JSON object, that contains metrics as keys, and values as
 Each creation step then involved inserting new papers’ metrics into the lists, while maintaining orderliness.
 
 Finally, after all the blocks are created, the “init directories by block” method reads in the latest block, and recreates a file structure that mirrors the data in the block. Specifically, the first paper in a metric’s list is clearly the greatest metric, so that paper would be linked to by the corresponding metric link in the root directory. Then, sub-directories are created for each unique conference, and according to the stored papers, sub-directories of years are created for the conferences. Each subdirectory has links to the paper represented by the metric.
-* Metrics Used
+*Collection of Research Paper Metrics
+**APIs used for collecting DOIs:
+There are many research papers related to different domains. But for our project we are considering only a limited number of conference papers related to the Computer Science field. The efficient way to distinguish between research papers is the DOI. A DOI, or Digital Object Identifier, is a string of numbers, letters and symbols used to uniquely identify an article or document, and to provide it with a permanent web address (URL). A DOI will help the reader easily locate a document from the citation. Think of it like a Social Security number for the article you're citing — it will always refer to that article, and only that one. While a web address (URL) might change, the DOI will never change. 
+So the first step in our project is to collect a list of DOIs which we want to show on our webpage and build a ranking system on those dataset. There are numerous ways to get a list of DOIs from the internet, but we used two specific APIs to automatically populate the DOI array.
+1. IEEE provides us with the API which can be used to Query and retrieve metadata records including abstracts for more than 5 million documents in IEEE Xplore® including Journals, Conference Proceedings, Books, Courses and Standards. So we used the API to retrieve a list of DOIs with a few keywords as the search parameters. 
+For example , if you need a list of 100 DOIs which are related to the Computer Vision field from the years 2015 to 2017, we can write a simple query 
+request="https://ieeexploreapi.ieee.org/api/v1/search/articles?index_terms=software&max_records=100&start_year=2015&end_year=2021&start_record=1&apikey=’yourapikey’ "
+x=requests.get(request)
+Now x has the list of DOIs along with their information. 
+Link : https://developer.ieee.org/docs
+2. Scopus also provides us with a huge database of research papers information. They have a large number of research papers related to many different fields. We can simply download the list of papers DOI for different conferences for different years which is in the form of a csv file. Using pandas we convert that into a dataframe and only extract the DOI column and append to our original list of DOIs.
+Link : https://www.scopus.com/sources.uri
+
+**APIs used to collect metrics
+Now that we have a list of DOIs, we can extract a lot of information about the papers using DOI as an index which distinguishes one paper from another. We classified different information related to a research paper to be a metric for our ranking system. There are different APIs available to achieve this task:
+- Arxiv	https://arxiv.org/help/api/index
+- Crossref https://github.com/fabiobatalha/crossrefapi
+- Springer https://dev.springernature.com/example-metadata-response
+- SemanticScholar https://www.semanticscholar.org/product/api
+- Scopus https://dev.elsevier.com/api_docs.html
+- IEEE  https://developer.ieee.org/docs
+But for our specific use case we used Scopus and Semantic Scholar APIs which gave us an almost consistent dataset. 
+1. Scopus also provides us with a Python-based API-Wrapper to access Scopus database: pybliometrics. pybliometrics is an easy to use Python library to pull, cache and extract data from the Scopus database. More information available here : https://pybliometrics.readthedocs.io/en/stable/ 
+pybliometrics provides one class per Scopus API Access Point. We used classes like:
+- scopus.AbstractRetrieval([identifier, …]) -  Interaction with the Abstract Retrieval API.
+- scopus.AffiliationRetrieval(aff_id[, …]) - Interaction with the Affiliation Retrieval API.
+- scopus.AuthorRetrieval(author_id[, refresh, …]) - Interaction with the Author Retrieval API.
+AbstractRetrieval is used to extract all the information regarding the research paper.
+AffiliationRetrieval is used to extract all the information about the affiliations which are related to the research paper. AuthorRetrieval is used to extract all the information about the authors from the research paper. 
+2. Semantic Scholar also  provides the RESTful Semantic Scholar Academic Graph (S2AG) API as a service to the global research community. The API is a reliable on-demand source of data about authors, papers, citations, venues, and more that allows linking directly to the corresponding page on semanticscholar.org for more information. Paper and author lookup are available from their Academic Graph service. More information available here : 
+https://www.semanticscholar.org/product/api. 
+The /paper/search endpoint will perform a keyword search for papers. 
+Eg: http://api.semanticscholar.org/graph/v1/paper/search?query=literature+graph
+There is a python library available on GitHub that aims to retrieve data from Semantic Scholar API. https://github.com/danielnsilva/semanticscholar
+It programmatically accesses paper and author data from the API. 
+
+**Metrics Used
 |  # | Metric                      | API              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 |  1 | Citations                   | Semantic Scholar | Number of citations                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 |  2 | References                  | Scopus           | Number of references                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -44,3 +80,310 @@ Finally, after all the blocks are created, the “init directories by block” m
 |  9 | hIndexAuthors               | Scopus           |   Sum of all the h index of authors from that research paper. The h-index is a number intended to represent both the productivity and the impact of a particular scientist or scholar, or a group of scientists or scholars (such as a departmental or research group). The h-index is calculated by counting the number of publications for which an author has been cited by other authors at least that same number of times.  For instance, an h-index of 17 means that the scientist has published at least 17 papers that have each been cited at least 17 times.  If the scientist's 18th most cited publication was cited only 10 times, the h-index would remain at 17.  If the scientist's 18th most cited publication was cited 18 or more times, the h-index would rise to 18. |
 | 10 | PlumX                       | Scopus           | PlumX Metrics provide insights into the ways people interact with individual pieces of research output in the online environment.  Examples: clicks, downloads, views, library holdings, video plays,bookmarks, code forks, favorites, readers, watchers, shares, likes, comments, tweets etc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | 11 | Page Rank                   | Semantic Scholar | ranking method is based on citation network                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+**Page Rank Algorithm
+Thousands of research papers are published every year and these papers span various fields of research. For a new researcher, it becomes a very difficult task to go through the entire repository of research papers in order to determine the important ones. The term important is subjective but it can be assured that a research paper that is popular will be important in most cases. There can be several ways of determining whether a research paper is important depending on the field of work, conference of publication, etc. Research papers cite other research papers from which they derive inspiration and there exists a well connected graph structure among the network of research papers. The importance of a research paper is directly proportional to the number of research papers that cite it. We have used this concept in our algorithm.
+We will build the citation network defined as a graph, with each research paper representing a node and the citations representing the edges in the graph, the edges being directed ones, directed from the citing node to the cited node. The first step uses paper citations and creates a data structure mapping each paper to its inlinks and outlinks. The next step is to implement the iterative PageRank algorithm. The iterative PageRank algorithm starts with initializing all the candidates to a constant value, generally unity and then it iteratively modifies each candidate's score depending on the score of the candidates that point towards it. It stops when all the candidate scores converge, i.e. become constant. The PageRank algorithm is based on the fact that the quality of a node is equivalent to the summation of the qualities of the nodes that point to it. In this case, quality refers to the score of the research paper. 
+
+*Conferences, Year and Number of Research Papers 
+|Conference                                                                                                                                                 |Year|Number of Papers|
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------|----|----------------|
+|2015 29th Brazilian Symposium on Software Engineering                                                                                                      |2015|1               |
+|2015 International Conference on Interactive Technologies and Games                                                                                        |2016|1               |
+|2019 SoutheastCon                                                                                                                                          |2019|1               |
+|2020 IEEE International Symposium on Antennas and Propagation and North American Radio Science Meeting                                                     |2020|1               |
+|ACIRS                                                                                                                                                      |2019|1               |
+|ACIT                                                                                                                                                       |2020|1               |
+|ACM Comput. Surv.                                                                                                                                          |2015|77              |
+|ACM Comput. Surv.                                                                                                                                          |2016|86              |
+|ACM Comput. Surv.                                                                                                                                          |2017|89              |
+|ACM Comput. Surv.                                                                                                                                          |2018|94              |
+|ACM Comput. Surv.                                                                                                                                          |2019|153             |
+|ACM Comput. Surv.                                                                                                                                          |2020|85              |
+|ACM Comput. Surv.                                                                                                                                          |2021|72              |
+|ACM Computing Surveys                                                                                                                                      |2018|3               |
+|ACM Computing Surveys                                                                                                                                      |2019|1               |
+|ACM Computing Surveys                                                                                                                                      |2020|1               |
+|ACM Computing Surveys                                                                                                                                      |2021|1               |
+|AIKE                                                                                                                                                       |2020|2               |
+|APEIE                                                                                                                                                      |2021|1               |
+|ASE                                                                                                                                                        |2021|2               |
+|ASONAM                                                                                                                                                     |2018|1               |
+|AST                                                                                                                                                        |2021|1               |
+|ASYU                                                                                                                                                       |2020|1               |
+|AUTEEE                                                                                                                                                     |2021|1               |
+|ApPLIED@PODC                                                                                                                                               |2018|8               |
+|ArXiv                                                                                                                                                      |2017|1               |
+|ArXiv                                                                                                                                                      |2021|1               |
+|BCD                                                                                                                                                        |2018|1               |
+|Big Data Min. Anal.                                                                                                                                        |2020|1               |
+|BigComp                                                                                                                                                    |2020|1               |
+|BigMM                                                                                                                                                      |2021|1               |
+|C2I4                                                                                                                                                       |2021|1               |
+|CCAI                                                                                                                                                       |2021|1               |
+|CCDC                                                                                                                                                       |2019|1               |
+|CCDC                                                                                                                                                       |2020|1               |
+|CEI                                                                                                                                                        |2021|1               |
+|CIBDA                                                                                                                                                      |2020|1               |
+|CICED                                                                                                                                                      |2016|1               |
+|CICN                                                                                                                                                       |2017|1               |
+|CIMPS                                                                                                                                                      |2021|1               |
+|CISTI                                                                                                                                                      |2020|2               |
+|CNNA                                                                                                                                                       |2021|1               |
+|COMPSAC                                                                                                                                                    |2021|1               |
+|CPP                                                                                                                                                        |2020|1               |
+|CSCI                                                                                                                                                       |2018|1               |
+|CSCI                                                                                                                                                       |2020|1               |
+|CSDE                                                                                                                                                       |2019|1               |
+|CSITSS                                                                                                                                                     |2021|1               |
+|CSUR                                                                                                                                                       |2021|1               |
+|CTISC                                                                                                                                                      |2021|1               |
+|CVIDL                                                                                                                                                      |2020|1               |
+|ComPE                                                                                                                                                      |2020|1               |
+|CommNet                                                                                                                                                    |2021|1               |
+|Computer                                                                                                                                                   |2015|2               |
+|CyberneticsCom                                                                                                                                             |2018|1               |
+|DCC '16                                                                                                                                                    |2016|11              |
+|DCNA                                                                                                                                                       |2021|1               |
+|DSAA                                                                                                                                                       |2021|1               |
+|DSMP                                                                                                                                                       |2018|1               |
+|DeepTest                                                                                                                                                   |2021|1               |
+|EEEIC / I&CPS Europe                                                                                                                                       |2020|1               |
+|EHB                                                                                                                                                        |2021|2               |
+|EIConRus                                                                                                                                                   |2018|1               |
+|EIConRus                                                                                                                                                   |2020|1               |
+|EIECS                                                                                                                                                      |2021|1               |
+|EMBC                                                                                                                                                       |2019|1               |
+|EMBC                                                                                                                                                       |2020|1               |
+|EMBC                                                                                                                                                       |2021|1               |
+|ET                                                                                                                                                         |2017|1               |
+|ETFA                                                                                                                                                       |2015|1               |
+|ETI 4.0                                                                                                                                                    |2021|1               |
+|Electron. Colloquium Comput. Complex.                                                                                                                      |2019|1               |
+|Electron. Colloquium Comput. Complex.                                                                                                                      |2020|1               |
+|EnT                                                                                                                                                        |2020|1               |
+|FCCM                                                                                                                                                       |2018|1               |
+|FSE                                                                                                                                                        |2020|1               |
+|GUCON                                                                                                                                                      |2021|1               |
+|HNICEM                                                                                                                                                     |2019|1               |
+|HONET                                                                                                                                                      |2020|1               |
+|HST                                                                                                                                                        |2017|1               |
+|I2CT                                                                                                                                                       |2017|1               |
+|I2CT                                                                                                                                                       |2021|1               |
+|IACC                                                                                                                                                       |2015|1               |
+|IACR Cryptol. ePrint Arch.                                                                                                                                 |2015|1               |
+|IACR Cryptol. ePrint Arch.                                                                                                                                 |2016|1               |
+|IACR Cryptol. ePrint Arch.                                                                                                                                 |2017|1               |
+|IACR Cryptol. ePrint Arch.                                                                                                                                 |2018|1               |
+|IACR Cryptol. ePrint Arch.                                                                                                                                 |2020|1               |
+|IACR Cryptol. ePrint Arch.                                                                                                                                 |2021|3               |
+|IBIOMED                                                                                                                                                    |2020|1               |
+|ICA-SYMP                                                                                                                                                   |2019|1               |
+|ICACCS                                                                                                                                                     |2021|1               |
+|ICACTM                                                                                                                                                     |2019|1               |
+|ICAICA                                                                                                                                                     |2020|1               |
+|ICAIS                                                                                                                                                      |2021|1               |
+|ICALIP                                                                                                                                                     |2017|1               |
+|ICALT                                                                                                                                                      |2016|1               |
+|ICALT                                                                                                                                                      |2021|1               |
+|ICBDA                                                                                                                                                      |2021|1               |
+|ICCAS                                                                                                                                                      |2021|1               |
+|ICCCI                                                                                                                                                      |2020|1               |
+|ICCCI                                                                                                                                                      |2021|1               |
+|ICCCNT                                                                                                                                                     |2020|2               |
+|ICCCNT                                                                                                                                                     |2021|2               |
+|ICCES                                                                                                                                                      |2021|2               |
+|ICCIKE                                                                                                                                                     |2019|1               |
+|ICCIKE                                                                                                                                                     |2021|1               |
+|ICCMC                                                                                                                                                      |2021|1               |
+|ICCSE                                                                                                                                                      |2016|1               |
+|ICCSNT                                                                                                                                                     |2018|1               |
+|ICCT                                                                                                                                                       |2016|1               |
+|ICCWAMTIP                                                                                                                                                  |2019|1               |
+|ICDAMT                                                                                                                                                     |2018|1               |
+|ICE/ITMC                                                                                                                                                   |2018|1               |
+|ICE2T                                                                                                                                                      |2017|1               |
+|ICECCE                                                                                                                                                     |2020|1               |
+|ICECCE                                                                                                                                                     |2021|1               |
+|ICECCO                                                                                                                                                     |2021|1               |
+|ICECE                                                                                                                                                      |2019|1               |
+|ICECET                                                                                                                                                     |2021|1               |
+|ICEEI                                                                                                                                                      |2015|1               |
+|ICEEOT                                                                                                                                                     |2016|1               |
+|ICESC                                                                                                                                                      |2020|1               |
+|ICETCI                                                                                                                                                     |2021|1               |
+|ICEVT                                                                                                                                                      |2018|1               |
+|ICIAfS                                                                                                                                                     |2021|1               |
+|ICIBA                                                                                                                                                      |2021|1               |
+|ICIC                                                                                                                                                       |2021|1               |
+|ICICCS                                                                                                                                                     |2020|1               |
+|ICICCT                                                                                                                                                     |2018|1               |
+|ICIEA                                                                                                                                                      |2019|1               |
+|ICIEA                                                                                                                                                      |2021|1               |
+|ICIEM                                                                                                                                                      |2020|1               |
+|ICIMTech                                                                                                                                                   |2021|1               |
+|ICIRCA                                                                                                                                                     |2021|2               |
+|ICIT                                                                                                                                                       |2017|1               |
+|ICKII                                                                                                                                                      |2021|1               |
+|ICMCCE                                                                                                                                                     |2020|1               |
+|ICMTMA                                                                                                                                                     |2016|1               |
+|ICMTMA                                                                                                                                                     |2020|1               |
+|ICORIS                                                                                                                                                     |2021|1               |
+|ICOSEC                                                                                                                                                     |2020|1               |
+|ICPCSI                                                                                                                                                     |2018|1               |
+|ICRAIE                                                                                                                                                     |2016|1               |
+|ICRCICN                                                                                                                                                    |2018|1               |
+|ICREST                                                                                                                                                     |2019|1               |
+|ICRIIS                                                                                                                                                     |2019|1               |
+|ICSA                                                                                                                                                       |2020|1               |
+|ICSCAN                                                                                                                                                     |2021|1               |
+|ICSCET                                                                                                                                                     |2018|1               |
+|ICSE-Companion                                                                                                                                             |2019|1               |
+|ICSE-NIER                                                                                                                                                  |2021|1               |
+|ICSE-SEIP                                                                                                                                                  |2019|1               |
+|ICSE-SEIP                                                                                                                                                  |2021|1               |
+|ICSEE                                                                                                                                                      |2017|1               |
+|ICSESS                                                                                                                                                     |2019|1               |
+|ICSICT                                                                                                                                                     |2018|1               |
+|ICSME                                                                                                                                                      |2020|3               |
+|ICSOC                                                                                                                                                      |2019|1               |
+|ICSOFT                                                                                                                                                     |2015|1               |
+|ICSSIT                                                                                                                                                     |2020|2               |
+|ICSSP                                                                                                                                                      |2019|1               |
+|ICST                                                                                                                                                       |2020|1               |
+|ICSTM                                                                                                                                                      |2015|1               |
+|ICSTW                                                                                                                                                      |2020|1               |
+|ICTACC                                                                                                                                                     |2017|1               |
+|ICTAI                                                                                                                                                      |2021|1               |
+|ICVRIS                                                                                                                                                     |2018|1               |
+|ICWE                                                                                                                                                       |2018|1               |
+|IDAP                                                                                                                                                       |2019|4               |
+|IEEE Access                                                                                                                                                |2017|1               |
+|IEEE Access                                                                                                                                                |2018|1               |
+|IEEE Access                                                                                                                                                |2019|1               |
+|IEEE Access                                                                                                                                                |2020|2               |
+|IEEE Access                                                                                                                                                |2021|1               |
+|IEEE Journal of Biomedical and Health Informatics                                                                                                          |2019|3               |
+|IEEE Journal of Biomedical and Health Informatics                                                                                                          |2020|1               |
+|IEEE Latin America Transactions                                                                                                                            |2020|2               |
+|IEEE Reviews in Biomedical Engineering                                                                                                                     |2021|1               |
+|IEEE Software                                                                                                                                              |2015|1               |
+|IEEE Software                                                                                                                                              |2016|3               |
+|IEEE Software                                                                                                                                              |2017|3               |
+|IEEE Software                                                                                                                                              |2018|1               |
+|IEEE Transactions on Automation Science and Engineering                                                                                                    |2021|1               |
+|IEEE Transactions on Biomedical Engineering                                                                                                                |2021|1               |
+|IEEE Transactions on Circuits and Systems for Video Technology                                                                                             |2015|1               |
+|IEEE Transactions on Cognitive and Developmental Systems                                                                                                   |2020|1               |
+|IEEE Transactions on Computers                                                                                                                             |2015|1               |
+|IEEE Transactions on Medical Imaging                                                                                                                       |2019|1               |
+|IEEE Transactions on Medical Imaging                                                                                                                       |2021|1               |
+|IEEE Transactions on Network and Service Management                                                                                                        |2018|2               |
+|IEEE Transactions on Neural Networks and Learning Systems                                                                                                  |2021|1               |
+|IEEE Transactions on Neural Systems and Rehabilitation Engineering                                                                                         |2019|2               |
+|IEEE Transactions on Neural Systems and Rehabilitation Engineering                                                                                         |2020|3               |
+|IEEE Transactions on Parallel and Distributed Systems                                                                                                      |2015|1               |
+|IEEE Transactions on Software Engineering                                                                                                                  |2015|1               |
+|IEEE transactions on bio-medical engineering                                                                                                               |2019|1               |
+|IEEE/ACM Transactions on Computational Biology and Bioinformatics                                                                                          |2017|1               |
+|IEEE/ACM Transactions on Computational Biology and Bioinformatics                                                                                          |2018|1               |
+|IEEE/ACM Transactions on Computational Biology and Bioinformatics                                                                                          |2019|1               |
+|IEEM                                                                                                                                                       |2020|1               |
+|IEMTRONICS                                                                                                                                                 |2020|1               |
+|IICIP                                                                                                                                                      |2017|1               |
+|IMCEC                                                                                                                                                      |2018|1               |
+|IMCEC                                                                                                                                                      |2021|1               |
+|INDICON                                                                                                                                                    |2016|1               |
+|INFOCOM                                                                                                                                                    |2020|1               |
+|INMIC                                                                                                                                                      |2019|1               |
+|INOCON                                                                                                                                                     |2020|1               |
+|IRI                                                                                                                                                        |2019|1               |
+|ISAMSR                                                                                                                                                     |2021|1               |
+|ISCID                                                                                                                                                      |2018|1               |
+|ISCID                                                                                                                                                      |2019|1               |
+|ISCID                                                                                                                                                      |2021|1               |
+|ISCV                                                                                                                                                       |2018|1               |
+|ISDFS                                                                                                                                                      |2018|1               |
+|ISESD                                                                                                                                                      |2017|1               |
+|ISETC                                                                                                                                                      |2020|1               |
+|ISMSIT                                                                                                                                                     |2018|1               |
+|ISMSIT                                                                                                                                                     |2019|1               |
+|ISMSIT                                                                                                                                                     |2021|1               |
+|ISOCC                                                                                                                                                      |2021|2               |
+|ISSRE                                                                                                                                                      |2016|1               |
+|ISSREW                                                                                                                                                     |2017|2               |
+|ISSREW                                                                                                                                                     |2018|1               |
+|ITC-Egypt                                                                                                                                                  |2021|1               |
+|ITCA                                                                                                                                                       |2020|1               |
+|Inf. Technol. Control.                                                                                                                                     |2020|1               |
+|IoT in Social, Mobile, Analytics and Cloud                                                                                                                 |2020|1               |
+|J. Syst. Softw.                                                                                                                                            |2021|1               |
+|JICV                                                                                                                                                       |2021|1               |
+|KhPIWeek                                                                                                                                                   |2020|1               |
+|LifeTech                                                                                                                                                   |2021|1               |
+|MIPR                                                                                                                                                       |2020|1               |
+|MIUCC                                                                                                                                                      |2021|1               |
+|MVIP                                                                                                                                                       |2020|1               |
+|MWSCAS                                                                                                                                                     |2020|1               |
+|NILES                                                                                                                                                      |2021|1               |
+|Null                                                                                                                                                       |2016|1               |
+|Null                                                                                                                                                       |2017|1               |
+|Null                                                                                                                                                       |2018|1               |
+|OCTA                                                                                                                                                       |2020|1               |
+|PESA                                                                                                                                                       |2016|1               |
+|PHM                                                                                                                                                        |2016|1               |
+|PODC                                                                                                                                                       |2015|56              |
+|PODC                                                                                                                                                       |2017|59              |
+|PODC                                                                                                                                                       |2018|60              |
+|PODC                                                                                                                                                       |2019|67              |
+|PODC                                                                                                                                                       |2020|64              |
+|PODC                                                                                                                                                       |2021|57              |
+|Proceedings of the 2018 Workshop on Advanced Tools, Programming Languages, and PLatforms for Implementing and Evaluating Algorithms for Distributed systems|2018|1               |
+|Proceedings of the 2018 Workshop on Theory and Practice for Integrated Cloud, Fog and Edge Computing Paradigms                                             |2018|2               |
+|Proceedings of the 2019 ACM Symposium on Principles of Distributed Computing                                                                               |2019|2               |
+|QRS                                                                                                                                                        |2016|1               |
+|QRS                                                                                                                                                        |2019|1               |
+|QRS                                                                                                                                                        |2020|2               |
+|QRS Companion                                                                                                                                              |2020|1               |
+|RE                                                                                                                                                         |2021|1               |
+|REW                                                                                                                                                        |2017|1               |
+|ROSE                                                                                                                                                       |2021|1               |
+|RoEduNet                                                                                                                                                   |2020|1               |
+|RusAutoCon                                                                                                                                                 |2019|1               |
+|SAMI                                                                                                                                                       |2016|1               |
+|SANER                                                                                                                                                      |2019|1               |
+|SBCARS '19                                                                                                                                                 |2019|1               |
+|SCCSIT                                                                                                                                                     |2018|1               |
+|SCEECS                                                                                                                                                     |2020|1               |
+|SCIS                                                                                                                                                       |2018|1               |
+|SCSE                                                                                                                                                       |2020|1               |
+|SEAA                                                                                                                                                       |2018|1               |
+|SEAD                                                                                                                                                       |2018|1               |
+|SER&IP                                                                                                                                                     |2021|11              |
+|SIU                                                                                                                                                        |2015|2               |
+|SIU                                                                                                                                                        |2016|3               |
+|SIU                                                                                                                                                        |2018|2               |
+|SIU                                                                                                                                                        |2019|1               |
+|SIU                                                                                                                                                        |2021|1               |
+|SNPD                                                                                                                                                       |2021|1               |
+|SYNASC                                                                                                                                                     |2018|1               |
+|SmartWorld/SCALCOM/UIC/ATC/CBDCom/IOP/SCI                                                                                                                  |2018|2               |
+|T4E                                                                                                                                                        |2019|1               |
+|TOPIC@PODC                                                                                                                                                 |2018|5               |
+|TSP                                                                                                                                                        |2020|1               |
+|TeNe                                                                                                                                                       |2010|1               |
+|TechDebt                                                                                                                                                   |2019|1               |
+|Trends and Future Directions                                                                                                                               |2018|1               |
+|UBMK                                                                                                                                                       |2021|3               |
+|URTC                                                                                                                                                       |2020|1               |
+|USBEREIT                                                                                                                                                   |2018|1               |
+|UYMS                                                                                                                                                       |2020|1               |
+|UYMS                                                                                                                                                       |2021|3               |
+|WWW                                                                                                                                                        |2018|1               |
+|WiSPNET                                                                                                                                                    |2021|1               |
+|e-Science                                                                                                                                                  |2018|1               |
+|i-PACT                                                                                                                                                     |2021|1               |
+|iCEEiCT                                                                                                                                                    |2018|1               |
+|iCoMET                                                                                                                                                     |2018|1               |
+|iCoMET                                                                                                                                                     |2020|1               |
+
+
