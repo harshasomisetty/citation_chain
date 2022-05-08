@@ -54,13 +54,13 @@ Now that we have a list of DOIs, we can extract a lot of information about the p
 - Scopus https://dev.elsevier.com/api_docs.html
 - IEEE  https://developer.ieee.org/docs
 But for our specific use case we used Scopus and Semantic Scholar APIs which gave us an almost consistent dataset. 
-1. Scopus also provides us with a Python-based API-Wrapper to access Scopus database: pybliometrics. pybliometrics is an easy to use Python library to pull, cache and extract data from the Scopus database. More information available here : https://pybliometrics.readthedocs.io/en/stable/ 
-pybliometrics provides one class per Scopus API Access Point. We used classes like:
+1. Scopus also provides us with a Python-based API-Wrapper to access Scopus database: pybliometrics. pybliometrics is an easy to use Python library to pull, cache and extract data from the Scopus database. More information available here : https://pybliometrics.readthedocs.io/en/stable/ . pybliometrics provides one class per Scopus API Access Point. We used classes like:
     - scopus.AbstractRetrieval([identifier, …]) -  Interaction with the Abstract Retrieval API.
     - scopus.AffiliationRetrieval(aff_id[, …]) - Interaction with the Affiliation Retrieval API.
-    - scopus.AuthorRetrieval(author_id[, refresh, …]) - Interaction with the Author Retrieval API.
-AbstractRetrieval is used to extract all the information regarding the research paper.
-AffiliationRetrieval is used to extract all the information about the affiliations which are related to the research paper. AuthorRetrieval is used to extract all the information about the authors from the research paper. 
+    - scopus.AuthorRetrieval(author_id[, refresh, …]) - Interaction with the Author Retrieval API. 
+    AbstractRetrieval is used to extract all the information regarding the research paper. 
+    AffiliationRetrieval is used to extract all the information about the affiliations which are related to the research paper. AuthorRetrieval is used to extract all 
+    the information about the authors from the research paper. 
 2. Semantic Scholar also  provides the RESTful Semantic Scholar Academic Graph (S2AG) API as a service to the global research community. The API is a reliable on-demand source of data about authors, papers, citations, venues, and more that allows linking directly to the corresponding page on semanticscholar.org for more information. Paper and author lookup are available from their Academic Graph service. More information available here : 
 https://www.semanticscholar.org/product/api. 
 The /paper/search endpoint will perform a keyword search for papers. 
