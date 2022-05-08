@@ -19,33 +19,51 @@ class calc:
             metrics_scopus= AbstractRetrieval(doi, view='FULL')
         except:
             return
-        time.sleep(2)
+        time.sleep(1)
+        
         sch = SemanticScholar(timeout=10)
         metrics_semanticscholar = sch.paper(doi)
         paper_title=metrics_scopus.title
         conf=["FSE","AAAI","ACL","CHI","CIKM","CVPR","FOCS","ICCV","ICML","ICSE","IJCAI","INFOCOM","KDD","MOBICOM","NeurIPS","NSDI","OSDI","PLDI","PODS","S&P","SIGCOMM","SIGIR","SIGMETRICS","SIGMOD","SODA","SOSP","STOC","UIST","VLDB","WWW"]
         # connferencename= next(substring for substring in conf if substring in metrics_scopus.confname)
         connference_name="Null"
-        if len(metrics_semanticscholar['venue'].split(" "))==1:
-            connference_name=metrics_semanticscholar['venue'].split(" ")[0]
-        for c in conf:
-            if c in metrics_semanticscholar['venue'].split(" "):
-                connference_name=c
-                break
-        if connference_name=="Null":
-            s=metrics_semanticscholar['venue']
-            connference_name=s[s.find("(")+1:s.find(")")]
+        if 'venue' in metrics_semanticscholar.keys():
+            if len(metrics_semanticscholar['venue'].split(" "))==1:
+                connference_name=metrics_semanticscholar['venue'].split(" ")[0]
+            for c in conf:
+                if c in metrics_semanticscholar['venue'].split(" "):
+                    connference_name=c
+                    break
+            if connference_name=="Null":
+                s=metrics_semanticscholar['venue']
+                if "(" in s and ")" in s:
+                    connference_name=s[s.find("(")+1:s.find(")")]
+                else:
+                    connference_name=s
         year=int(metrics_scopus.coverDate.split("-")[0])
-        number_of_citations= len(metrics_semanticscholar['citations'])
+        if 'citations' in metrics_semanticscholar.keys():
+            number_of_citations= len(metrics_semanticscholar['citations'])
+        else:
+            number_of_citations=0
         number_of_references=metrics_scopus.refcount
         number_of_authors=len(metrics_scopus.authors)
-        if metrics_scopus.endingPage and metrics_scopus.startingPage:
+        if metrics_scopus.endingPage and metrics_scopus.startingPage and metrics_scopus.endingPage.isdecimal() and metrics_scopus.startingPage.isdecimal():
             number_of_pages= int(metrics_scopus.endingPage)-int(metrics_scopus.startingPage)
         else:
             number_of_pages=0
-        self.references.append(metrics_semanticscholar['references'])
-        self.main_paperid.append(metrics_semanticscholar['paperId'])
-        citationVelocity=metrics_semanticscholar['citationVelocity']
+        if 'references' in metrics_semanticscholar.keys():
+            self.references.append(metrics_semanticscholar['references'])
+        else:
+            self.references.append([])
+        if 'paperId' in metrics_semanticscholar.keys():
+            self.main_paperid.append(metrics_semanticscholar['paperId'])
+        else:
+            self.main_paperid.append('')
+        if 'citationVelocity' in metrics_semanticscholar.keys():
+            citationVelocity=metrics_semanticscholar['citationVelocity']
+        else:
+            citationVelocity=0
+        
         #Affiliation details
         aff_info= metrics_scopus.affiliation
         numberOfAuthorsAffiliation=0
@@ -53,7 +71,10 @@ class calc:
         if aff_info != None:
             for a in aff_info:
                 aff_id=a[0]
-                aff = AffiliationRetrieval(aff_id)
+                try:
+                    aff = AffiliationRetrieval(aff_id)
+                except:
+                    continue
                 numberOfAuthorsAffiliation+=aff.author_count
                 numberOfDocumentsAffiliation+=aff.document_count
         #Authors details
@@ -63,16 +84,23 @@ class calc:
         if authors_info != None:
             for auth in authors_info:
                 auth_id=auth[0]
-                author = AuthorRetrieval(auth_id)
+                try:
+                    author = AuthorRetrieval(auth_id)
+                except:
+                    continue
                 numberOfDocsByAuthors+=author.document_count
                 hIndexOfAuthors+=author.h_index
         
-        plum = PlumXMetrics(doi, id_type='doi')
-        plummetrics=plum.category_totals
         plumXmetrics=0
-        if plummetrics != None:
-            for cat in plummetrics:
-                plumXmetrics+=cat[1]
+        try:
+            plum = PlumXMetrics(doi, id_type='doi')
+        except:
+            plum = None
+        if plum!=None:
+            plummetrics=plum.category_totals
+            if plummetrics != None:
+                for cat in plummetrics:
+                    plumXmetrics+=cat[1]
         link=metrics_scopus.scopus_link
         list=[doi,paper_title,year,connference_name,number_of_citations,number_of_references,number_of_authors,number_of_pages,citationVelocity,numberOfAuthorsAffiliation,numberOfDocumentsAffiliation,numberOfDocsByAuthors,hIndexOfAuthors,plumXmetrics,link]
         # print("paper_title",paper_title)
@@ -144,6 +172,26 @@ class calc:
         request="https://ieeexploreapi.ieee.org/api/v1/search/articles?index_terms=computer+vision&max_records=100&start_year=2015&end_year=2021&start_record=1&apikey=bz7esz8bu4zef4ye75bwuzvv"
         x=requests.get(request)
         list_doi.extend([item for item in [item['doi'] if 'doi' in item else 'xxx' for item in x.json()['articles']] if item != 'xxx'])
+        df1 = pd.read_csv('./scopus_dois_csvs/ACM Computing Surveys.csv')
+        df2 = pd.read_csv('./scopus_dois_csvs/IEEE Transactions on Cybernetics.csv')
+        # df3 = pd.read_csv('./scopus_dois_csvs/IEEE Transactions on Network and Service Management.csv')
+        df4 = pd.read_csv('./scopus_dois_csvs/International Conference on Architectural Support for Programming Languages and Operating Systems - ASPLOS.csv')
+        # df5 = pd.read_csv('./scopus_dois_csvs/Proceedings of the ACM Conference on Computer and Communications Security.csv')
+        df6 = pd.read_csv('./scopus_dois_csvs/Proceedings of the ACM SIGMOD International Conference on Management of Data.csv')
+        df7 = pd.read_csv('./scopus_dois_csvs/Proceedings of the Annual ACM Symposium on Principles of Distributed Computing.csv')
+        # df8 = pd.read_csv('./scopus_dois_csvs/Proceedings of the IEEE International Conference on Computer Vision.csv')
+        df1_doi=df1["DOI"]
+        df2_doi=df2["DOI"]
+        # df3_doi=df3["DOI"]
+        df4_doi=df4["DOI"]
+        # df5_doi=df5["DOI"]
+        df6_doi=df6["DOI"]
+        df7_doi=df7["DOI"]
+        # df8_doi=df8["DOI"]
+        array_dfs=[df1_doi,df2_doi,df4_doi,df6_doi,df7_doi]
+        df = pd.concat(array_dfs)
+        arr=df.values.tolist()
+        list_doi.extend(arr)
         for doi in tqdm(list_doi):
             self.get_metrics(doi)
         page_rank=calculate_page_rank(self.final_doi_count,self.references, self.main_paperid)
