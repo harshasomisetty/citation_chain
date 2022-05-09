@@ -47,7 +47,7 @@ def hello_world():
 @app.route('/nav')
 @app.route('/nav/')
 def access_main():
-    return render_template('main_page.html', metrics = metrics, confs = sorted(get_confs_names()))
+    return render_template('main_page.html', metrics = metrics, confs = get_confs_names())
 
 @app.route('/nav/metric/<metric>')
 def access_main_metric(metric):

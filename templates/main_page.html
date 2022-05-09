@@ -15,7 +15,7 @@
 
 
     <h3>Conferences</h3>
-    {% for conf in confs %}
+    {% for conf in sorted(confs) %}
     <a href="{{conf}}">
       <p>
         {{conf}}

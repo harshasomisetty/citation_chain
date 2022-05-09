@@ -18,7 +18,7 @@
 
 
     <h3>Years</h3>
-    {% for year in years %}
+    {% for year in sorted(years) %}
     <a href="{{conf ~ '/' ~ year}}">
       <p>{{year}}</p>
     </a>
