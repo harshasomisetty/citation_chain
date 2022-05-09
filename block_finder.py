@@ -172,13 +172,14 @@ def create_block(batch):
 def block_routine(batch):
 
     def get_top_paper(papers, metric):
-        found_batch = df[df["PaperId"].isin(papers)].sort_values(by=[metric], ascending=False)[["Paper", metric]]
+        found_batch = df[df["PaperId"].isin(papers)].sort_values(by=[metric], ascending=False)[["PaperId", metric, "Paper"]]
         return found_batch.head(1).values.tolist()[0]
 
     def set_block_metrics(metric_ptr, papers):
         for ind, metric in enumerate(metrics):
             top_paper = get_top_paper(papers, metric)
-            metric_ptr[ind] = top_paper[0]
+            print("TOP PAPER", top_paper)
+            metric_ptr[ind] = [top_paper[0], top_paper[2]]
     
     new_inserts = create_block(batch)
 

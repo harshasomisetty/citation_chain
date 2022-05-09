@@ -47,11 +47,12 @@ def hello_world():
 @app.route('/nav')
 @app.route('/nav/')
 def access_main():
-    return render_template('main_page.html', metrics = metrics, confs = get_confs_names())
+    return render_template('main_page.html', metrics = metrics, confs = sorted(get_confs_names()))
 
 @app.route('/nav/metric/<metric>')
 def access_main_metric(metric):
-    return render_template('metric_page.html', paper = block_data[0][metrics.index(metric)], metric = metric)
+    paper_data = block_data[0][metrics.index(metric)]
+    return render_template('metric_page.html', paperDOI = paper_data[0], paper = paper_data[1], metric = metric)
 
 
 @app.route('/nav/<conf>')
@@ -65,7 +66,8 @@ def access_conf(conf):
 def access_conf_metric(conf,  metric):
     if conf in get_confs_names():
         conf_block = get_conf(conf)
-        return render_template('metric_page.html', paper = conf_block[1][metrics.index(metric)], metric = metric, conf = conf)
+        paper_data = conf_block[1][metrics.index(metric)]
+        return render_template('metric_page.html', paperDOI = paper_data[0], paper = paper_data[1], metric = metric, conf = conf)
     else:
         return "metric doesn't exist in this conf"
 
@@ -82,9 +84,10 @@ def access_year_metric(conf, year, metric):
     if conf in get_confs_names() and int(year) in get_conf_year_list(conf):
         # conf_block = get_conf(conf)
         year_block = get_conf_and_year(conf, int(year))
-        return render_template('metric_page.html', paper = year_block[1][metrics.index(metric)], metric = metric, conf = conf, year = year)
+        paper_data = year_block[1][metrics.index(metric)]
+        return render_template('metric_page.html', paperDOI = paper_data[0], paper = paper_data[1], metric = metric, conf = conf, year = year)
     else:
         return "metric doesn't exist in this year"
 
 if __name__ == '__main__':
-  app.run(debug =True)
+  app.run(port=8080, host='0.0.0.0', debug = True)
