@@ -1,3 +1,6 @@
+* Report 
+Members: Gunjan Singh(gs896) , Harsha Somisetty (hs884)
+
 * Intro
 This project was an introduction to distributed file systems and blockchain-based storage of data. Project allows users to insert groups of papers, at which point, metrics such as most citations in a conference are updated. Users can interact with these metrics, and can even see the historical changes of which paper corresponds to the highest metric.
 
