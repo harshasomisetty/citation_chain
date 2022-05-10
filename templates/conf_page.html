@@ -1,27 +1,30 @@
 <html>
-  <head>
+
+<head>
     <title>sdf</title>
-  </head>
-  <body>
+</head>
+
+<body>
     <h1>Conference Page: {{conf}}</h1>
     <a href="{{'/nav/'}}">
-      <p>Main page</p>
+        <p>Main page</p>
     </a>
     <h3>Metrics</h3>
     {% for metric in metrics: %}
     <a href="{{conf ~ '/metric/' ~ metric}}">
-      <p>
-        {{metric}}
-      </p>
+        <p>
+            {{metric}}
+        </p>
     </a>
     {% endfor %}
 
 
     <h3>Years</h3>
-    {% for year in sorted(years) %}
+    {% for year in years|sort(reverse= True) %}
     <a href="{{conf ~ '/' ~ year}}">
-      <p>{{year}}</p>
+        <p>{{year}}</p>
     </a>
     {% endfor %}
-  </body>
+</body>
+
 </html>

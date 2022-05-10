@@ -1,26 +1,29 @@
 <html>
-  <head>
+
+<head>
     <title>sdf</title>
-  </head>
-  <body>
+</head>
+
+<body>
     <h1>Main Page</h1>
     <h3>Metrics</h3>
     {% for metric in metrics: %}
     <a href="{{'metric/' ~ metric}}">
-      <p>
-        {{metric}}
-      </p>
+        <p>
+            {{metric}}
+        </p>
     </a>
     {% endfor %}
 
 
     <h3>Conferences</h3>
-    {% for conf in sorted(confs) %}
+    {% for conf in confs|sort() %}
     <a href="{{conf}}">
-      <p>
-        {{conf}}
-      </p>
+        <p>
+            {{conf}}
+        </p>
     </a>
     {% endfor%}
-  </body>
+</body>
+
 </html>
